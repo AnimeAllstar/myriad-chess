@@ -1,22 +1,22 @@
 import random
 
 import chess
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
-
-class Game(BaseModel):
-    fen: str
-
+from ChessValidationMiddleware import ChessValidationMiddleware, get_board
+from api_types import MoveResponse
+from search_tree_algorithms import minimax
 
 app = FastAPI()
 
+# List of origins that are allowed to make requests to this API
 origins = [
     'http://localhost',
     'http://localhost:3000',
 ]
 
+# Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -25,28 +25,57 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+# Add board validation middleware to validate the chess board state
+app.middleware('http')(ChessValidationMiddleware(app))
+
 
 @app.get('/')
 async def root():
+    """
+    Root endpoint that returns a simple greeting message.
+    """
     return 'Hello World'
 
 
+def log_move(board: chess.Board, move: chess.Move):
+    """
+    Log the current board state and the chosen move.
+
+    :param board: A chess board object with the current game state.
+    :param move: The chosen move as a chess.Move object.
+    """
+    print(f'fen: {board.fen()}, move: {move.uci()}')
+
+
 @app.post('/api/random')
-async def random_ai(game: Game, response: Response):
-    try:
-        board = chess.Board(game.fen)
-    except ValueError:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return 'Invalid FEN'
+async def random_ai(board: chess.Board = Depends(get_board)) -> MoveResponse:
+    """
+    API route for making a random move on the chessboard.
+    The move is chosen randomly from the list of legal moves.
 
-    if not board.is_valid():
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return 'Invalid FEN'
-
-    if board.is_game_over():
-        return {'fen': board.fen(), 'outcome': board.outcome()}
-
+    :param board: A chess board object with the current game state.
+    :return: A MoveResponse object with the updated FEN and the chosen move.
+    """
     move = random.choice(list(board.legal_moves))
     board.push(move)
 
-    return {'fen': board.fen(), 'move': move.uci()}
+    log_move(board, move)
+    return MoveResponse(fen=board.fen(), move=move.uci())
+
+
+@app.post('/api/minmax/{depth}')
+async def minmax_ai(depth: int, board: chess.Board = Depends(get_board)) -> MoveResponse:
+    """
+    API route for making a move on the chessboard using the minimax algorithm
+    with a specified search depth.
+
+    :param depth: The search depth for the minimax algorithm.
+    :param board: A chess board object with the current game state.
+    :return: A MoveResponse object with the updated FEN and the chosen move.
+    """
+    move, _ = minimax(board, depth, float('-inf'), float('inf'), True)
+    best_move = chess.Move.from_uci(move)
+    board.push(best_move)
+
+    log_move(board, best_move)
+    return MoveResponse(fen=board.fen(), move=best_move.uci())
