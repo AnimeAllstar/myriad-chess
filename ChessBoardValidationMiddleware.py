@@ -5,9 +5,9 @@ from pydantic import ValidationError
 from api_types import Game
 
 
-# ChessValidationMiddleware is a middleware that validates FEN strings,
+# ChessBoardValidationMiddleware is a middleware that validates FEN strings,
 # initializes chess boards, and attaches them to the request's state.
-class ChessValidationMiddleware:
+class ChessBoardValidationMiddleware:
     def __init__(self, app: FastAPI):
         self.app = app
 
@@ -41,7 +41,7 @@ class ChessValidationMiddleware:
 
 
 # get_board is a FastAPI dependency function that retrieves the chess.Board object
-# attached to a request's state by the ChessValidationMiddleware.
+# attached to a request's state by the ChessBoardValidationMiddleware.
 def get_board(request: Request) -> chess.Board:
     """
     Retrieve the chess.Board object from the request's state.

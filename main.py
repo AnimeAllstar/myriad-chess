@@ -4,7 +4,7 @@ import chess
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from ChessValidationMiddleware import ChessValidationMiddleware, get_board
+from ChessBoardValidationMiddleware import ChessBoardValidationMiddleware, get_board
 from api_types import MoveResponse
 from search_tree_algorithms import minimax
 
@@ -26,7 +26,7 @@ app.add_middleware(
 )
 
 # Add board validation middleware to validate the chess board state
-app.middleware('http')(ChessValidationMiddleware(app))
+app.middleware('http')(ChessBoardValidationMiddleware(app))
 
 
 @app.get('/')
@@ -63,8 +63,8 @@ async def random_ai(board: chess.Board = Depends(get_board)) -> MoveResponse:
     return MoveResponse(fen=board.fen(), move=move.uci())
 
 
-@app.post('/api/minmax/{depth}')
-async def minmax_ai(depth: int, board: chess.Board = Depends(get_board)) -> MoveResponse:
+@app.post('/api/minimax/{depth}')
+async def minimax_ai(depth: int, board: chess.Board = Depends(get_board)) -> MoveResponse:
     """
     API route for making a move on the chessboard using the minimax algorithm
     with a specified search depth.
