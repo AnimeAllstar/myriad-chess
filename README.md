@@ -15,7 +15,14 @@ git clone git@github.com:AnimeAllstar/myriad-chess.git
 cd myriad-chess
 pipenv install
 pipenv shell
+pre-commit install # installs pre-commit git hooks
 uvicorn main:app --reload # runs the server on localhost:8000
+```
+
+### Other Commands
+
+```bash
+pre-commit run --all-files # runs all pre-commit hooks manually
 ```
 
 ## Dependencies

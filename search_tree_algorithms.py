@@ -1,3 +1,4 @@
+"""This Module contains the search tree algorithms implemented for the chess API."""
 from typing import Tuple
 
 import chess
@@ -23,7 +24,7 @@ def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximi
 
     # Maximizing player's turn
     if is_maximizing_player:
-        max_eval = float('-inf')  # Initialize the maximum evaluation to negative infinity
+        max_eval = float("-inf")  # Initialize the maximum evaluation to negative infinity
         best_move = None  # Initialize the best move as None
 
         # Iterate through all legal moves
@@ -42,24 +43,24 @@ def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximi
                 break
 
         return best_move.uci(), max_eval  # Return the best move and the maximum evaluation
-    else:
-        # Minimizing player's turn
-        min_eval = float('inf')  # Initialize the minimum evaluation to positive infinity
-        best_move = None  # Initialize the best move as None
 
-        # Iterate through all legal moves
-        for move in board.legal_moves:
-            board.push(move)  # Make the move on the board
-            current_eval = minimax(board, depth - 1, alpha, beta, True)[1]  # Get the evaluation of the move
-            board.pop()  # Undo the move
+    # Minimizing player's turn
+    min_eval = float("inf")  # Initialize the minimum evaluation to positive infinity
+    best_move = None  # Initialize the best move as None
 
-            # Update the minimum evaluation and best move if the current evaluation is lower
-            if current_eval < min_eval:
-                min_eval = current_eval
-                best_move = move
+    # Iterate through all legal moves
+    for move in board.legal_moves:
+        board.push(move)  # Make the move on the board
+        current_eval = minimax(board, depth - 1, alpha, beta, True)[1]  # Get the evaluation of the move
+        board.pop()  # Undo the move
 
-            beta = min(beta, current_eval)  # Update the beta value
-            if beta <= alpha:  # If beta is less than or equal to alpha, prune the remaining branches
-                break
+        # Update the minimum evaluation and best move if the current evaluation is lower
+        if current_eval < min_eval:
+            min_eval = current_eval
+            best_move = move
 
-        return best_move.uci(), min_eval  # Return the best move and the minimum evaluation
+        beta = min(beta, current_eval)  # Update the beta value
+        if beta <= alpha:  # If beta is less than or equal to alpha, prune the remaining branches
+            break
+
+    return best_move.uci(), min_eval  # Return the best move and the minimum evaluation

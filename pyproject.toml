@@ -1,0 +1,7 @@
+[tool.black]
+line-length = 120
+
+[tool.pylint]
+max-line-length = 120
+extension-pkg-whitelist = 'pydantic'
+good-names = ['i', 'j', 'k', 'ex', 'Run', '_', 'e', 'x', 'y']
