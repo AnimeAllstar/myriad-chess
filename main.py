@@ -17,6 +17,9 @@ origins = [
     "http://localhost:3000",
 ]
 
+# Add board validation middleware to validate the chess board state
+app.middleware("http")(chess_board_validation_middleware)
+
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
@@ -25,9 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add board validation middleware to validate the chess board state
-app.middleware("http")(chess_board_validation_middleware)
 
 
 @app.get("/")
