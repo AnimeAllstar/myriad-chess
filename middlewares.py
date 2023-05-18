@@ -3,6 +3,8 @@ from typing import Callable
 
 import chess
 from fastapi import Request, Response, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from api_types import Game
@@ -36,7 +38,8 @@ async def chess_board_validation_middleware(request: Request, call_next: Callabl
 
         # Check if the game is already over
         if board.is_game_over():
-            return Response("Game Over", status_code=status.HTTP_400_BAD_REQUEST)
+            outcome_json = jsonable_encoder({"fen": board.fen(), "outcome": board.outcome()})
+            return JSONResponse(content=outcome_json, status_code=status.HTTP_200_OK)
 
         # Attach the chess.Board object to the request's state
         request.state.board = board
